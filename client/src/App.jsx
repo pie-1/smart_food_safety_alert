@@ -5,6 +5,7 @@ import SubmitReport from "./pages/SubmitReport";
 import MapPage from "./pages/MapPage.jsx";
 import VendorProfile from "./pages/VendorProfile";
 import Alert from "./pages/alert.jsx";
+import Search from "./pages/search.jsx";
 
 
 
@@ -19,6 +20,7 @@ function App() {
           <Route path="/map" element={<MapPage />} />
           <Route path="/vendor/:vendorId" element={<VendorProfile />} />
           <Route path="/alert" element={<Alert />} />
+          <Route path="/search" element={<Search />} />
         </Routes>
       </div>
     </BrowserRouter>
