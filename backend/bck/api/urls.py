@@ -1,9 +1,15 @@
 from django.urls import path, include
-from rest_framework.authtoken import views
-from .views import home
+from rest_framework.routers import DefaultRouter
+from . import views
 
+# Create a router and register our viewsets with it.
+router = DefaultRouter()
+router.register(r'reports', views.ReportViewSet, basename='report')
+router.register(r'symptoms', views.SymptomViewSet, basename='symptom')
+router.register(r'tags', views.TagViewSet, basename='tag')
+
+# The API URLs are now determined automatically by the router.
 urlpatterns = [
-    path('', home , name='api.home'),
-    path('reports/',include('api.reports.urls')),
-    
+    path('', include(router.urls)),
 ]
+

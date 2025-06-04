@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import Report, Symptom, Tag
 
-# Register your models here.
+admin.site.register(Report)
+admin.site.register(Symptom)
+admin.site.register(Tag)
