@@ -47,9 +47,71 @@ const MapPage = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [geocodingQueue, setGeocodingQueue] = useState([]);
+  const [isGeocoding, setIsGeocoding] = useState(false);
   
   // This will hold the selected location coordinates from your location input/autocomplete
   const [selectedCoordinates, setSelectedCoordinates] = useState(null);
+
+  // Add this function to geocode locations without coordinates
+  const geocodeLocation = async (locationText, reportId) => {
+    if (!locationText) return;
+    
+    try {
+      const response = await axios.get("https://nominatim.openstreetmap.org/search", {
+        params: {
+          q: locationText,
+          format: "json",
+          limit: 1,
+        }
+      });
+      
+      if (response.data && response.data.length > 0) {
+        const { lat, lon } = response.data[0];
+        // Update the report with coordinates
+        setReports(prevReports => 
+          prevReports.map(report => 
+            report.id === reportId 
+              ? {
+                  ...report, 
+                  location: { 
+                    lat: parseFloat(lat), 
+                    lng: parseFloat(lon) 
+                  }
+                }
+              : report
+          )
+        );
+        console.log(`Geocoded location for report ${reportId}: ${lat}, ${lon}`);
+      } else {
+        console.warn(`No geocoding results for location: ${locationText}`);
+      }
+    } catch (error) {
+      console.error("Geocoding error:", error);
+    }
+  };
+
+  // Process geocoding queue with rate limiting
+  useEffect(() => {
+    const processQueue = async () => {
+      if (geocodingQueue.length === 0 || isGeocoding) return;
+      
+      setIsGeocoding(true);
+      const item = geocodingQueue[0];
+      
+      await geocodeLocation(item.location, item.id);
+      
+      // Remove the processed item from queue
+      setGeocodingQueue(prev => prev.slice(1));
+      
+      // Add delay to respect Nominatim usage policy (1 request per second)
+      setTimeout(() => {
+        setIsGeocoding(false);
+      }, 1100);
+    };
+    
+    processQueue();
+  }, [geocodingQueue, isGeocoding]);
 
   useEffect(() => {
     // Get user location or fallback
@@ -97,12 +159,25 @@ const MapPage = () => {
           video: report.video || null,
           symptoms: report.symptoms_read || [],
           // Generate user info for display
-          user: `user-${report.id.substring(0, 8)}`,
-          // Generate location display
+          user: `user-${String(report.id).substring(0, 8)}`,
+          // Store original location text
           locationDisplay: report.location
         }));
         
         setReports(apiReports);
+        
+        // Queue reports that need geocoding
+        const geocodingNeeded = apiReports.filter(report => 
+          (!report.location?.lat || !report.location?.lng) && report.locationDisplay
+        );
+        
+        if (geocodingNeeded.length > 0) {
+          console.log(`Queueing ${geocodingNeeded.length} reports for geocoding`);
+          setGeocodingQueue(geocodingNeeded.map(report => ({
+            id: report.id,
+            location: report.locationDisplay
+          })));
+        }
       } catch (apiErr) {
         console.error("Error fetching reports from API:", apiErr);
         
@@ -131,7 +206,7 @@ const MapPage = () => {
               // Generate timestamp if not provided
               timestamp: data.timestamp || new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
               // Generate user info for display
-              user: `user-${doc.id.substring(0, 8)}`,
+              user: `user-${String(doc.id).substring(0, 8)}`,
               // Generate symptoms if not provided
               symptoms: data.symptoms || []
             };
@@ -187,6 +262,11 @@ const MapPage = () => {
     }
   };
 
+  // Count reports with valid coordinates
+  const reportsWithCoordinates = reports.filter(report => 
+    report.location?.lat && report.location?.lng
+  ).length;
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <h2 className="text-xl font-bold mb-4 text-purple-700">Live Food Safety Alert Map</h2>
@@ -215,22 +295,11 @@ const MapPage = () => {
           )}
           
           {loading && <p className="text-sm text-gray-500">Loading reports...</p>}
+          {geocodingQueue.length > 0 && <p className="text-sm text-blue-500">Geocoding locations: {geocodingQueue.length} remaining...</p>}
           {error && <p className="text-sm text-red-500">{error}</p>}
           
           <div className="text-sm text-gray-600">
-            Showing {reports.filter(report => {
-              // Filter by distance if user location is available
-              if (userLocation && report.location?.lat && report.location?.lng) {
-                const distance = getDistanceFromLatLonInKm(
-                  userLocation.lat, 
-                  userLocation.lng, 
-                  report.location.lat, 
-                  report.location.lng
-                );
-                if (distance > filters.radius) return false;
-              }
-              return true;
-            }).length} of {reports.length} reports
+            Showing {reportsWithCoordinates} of {reports.length} reports on map
           </div>
         </div>
 
@@ -307,7 +376,7 @@ const MapPage = () => {
                               {report.business_name}, {report.locationDisplay?.split(',').slice(0, 2).join(',') || 'Unknown Location'}
                             </h3>
                             <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>
-                              {getRelativeTime(report.timestamp)} • reported by {report.user || `user-${report.id.substring(0, 8)}`} • 
+                              {getRelativeTime(report.timestamp)} • reported by {report.user || `user-unknown`} • 
                               <a href="#" style={{ color: '#9c27b0', textDecoration: 'none', marginLeft: '3px' }}>details</a>
                             </p>
                           </div>
