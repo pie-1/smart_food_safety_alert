@@ -56,63 +56,82 @@ const Alert = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Local Food Safety Alerts</h1>
+    <div className="bg-[#FFFFFF] min-h-screen font-['Noto_Sans_JP']">
+      <section className="bg-[#F3EDE1] min-h-[calc(100vh-80px)] flex items-center justify-center">
+        <div className="container mx-auto px-8">
+          <h1 className="text-4xl font-bold text-[#1C2526] mb-8 font-['HIRO_MISAKE'] text-center">
+            Local Food Safety Alerts
+          </h1>
 
-      <form onSubmit={handleSubscription} className="mb-4 max-w-md">
-        <div className="mb-2">
-          <label className="block text-sm font-medium text-gray-700">Username</label>
-          <input
-            type="text"
-            className="border p-2 w-full rounded"
-            value={subscription.username}
-            onChange={(e) => setSubscription({ ...subscription, username: e.target.value })}
-            required
-          />
-        </div>
-        <div className="mb-2">
-          <label className="block text-sm font-medium text-gray-700">Email (optional)</label>
-          <input
-            type="email"
-            className="border p-2 w-full rounded"
-            value={subscription.email}
-            onChange={(e) => setSubscription({ ...subscription, email: e.target.value })}
-          />
-        </div>
-        <div className="mb-2">
-          <label className="block text-sm font-medium text-gray-700">Phone (optional)</label>
-          <input
-            type="tel"
-            className="border p-2 w-full rounded"
-            value={subscription.phone}
-            onChange={(e) => setSubscription({ ...subscription, phone: e.target.value })}
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-        >
-          Subscribe to Alerts
-        </button>
-        {message && <p className="mt-2 text-sm text-red-500">{message}</p>}
-      </form>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Subscription Form */}
+            <div className="bg-white rounded-xl shadow-lg p-8 space-y-6" style={{ height: '600px', overflowY: 'auto' }}>
+              <h2 className="text-2xl font-semibold text-[#1C2526] mb-4 font-['HIRO_MISAKE']">
+                Subscribe to Alerts
+              </h2>
+              <form onSubmit={handleSubscription} className="space-y-6">
+                <div>
+                  <label className="block text-[#1C2526] text-base font-medium mb-2">Username</label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 rounded-lg border border-[#F28C38] focus:outline-none focus:ring-2 focus:ring-[#F28C38] text-[#1C2526] text-base"
+                    value={subscription.username}
+                    onChange={(e) => setSubscription({ ...subscription, username: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#1C2526] text-base font-medium mb-2">Email (optional)</label>
+                  <input
+                    type="email"
+                    className="w-full px-4 py-2 rounded-lg border border-[#F28C38] focus:outline-none focus:ring-2 focus:ring-[#F28C38] text-[#1C2526] text-base"
+                    value={subscription.email}
+                    onChange={(e) => setSubscription({ ...subscription, email: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#1C2526] text-base font-medium mb-2">Phone (optional)</label>
+                  <input
+                    type="tel"
+                    className="w-full px-4 py-2 rounded-lg border border-[#F28C38] focus:outline-none focus:ring-2 focus:ring-[#F28C38] text-[#1C2526] text-base"
+                    value={subscription.phone}
+                    onChange={(e) => setSubscription({ ...subscription, phone: e.target.value })}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full text-white py-3 rounded-lg transition duration-150 ease-in-out text-base"
+                  style={{ backgroundColor: '#F28C38' }}
+                >
+                  Subscribe to Alerts
+                </button>
+                {message && <p className="text-red-600 bg-red-100 p-4 rounded text-base">{message}</p>}
+              </form>
+            </div>
 
-      {alerts.length > 0 && (
-        <div className="mt-4">
-          <h2 className="text-xl font-semibold mb-2">Nearby Alerts</h2>
-          <ul className="list-disc pl-5">
-            {alerts.map((alert, index) => (
-              <li key={index} className="mb-1">
-                <strong>{alert.title}</strong>: {alert.description} <br />
-                Business: {alert.business_name || 'N/A'} <br />
-                Location: {alert.latitude}, {alert.longitude} <br />
-                Symptoms: {alert.symptoms.map(s => s.name).join(', ') || 'None'} <br />
-                Tags: {alert.tags.map(t => t.name).join(', ') || 'None'}
-              </li>
-            ))}
-          </ul>
+            {/* Nearby Alerts */}
+            {alerts.length > 0 && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-semibold text-[#1C2526] mb-4 font-['HIRO_MISAKE']">
+                  Nearby Alerts
+                </h2>
+                {alerts.map((alert, index) => (
+                  <div key={index} className="bg-white rounded-xl shadow-md p-6">
+                    <h3 className="font-semibold text-lg text-[#1C2526] mb-2">
+                      {alert.title}
+                    </h3>
+                    <p className="text-base text-[#1C2526] mb-2">{alert.description}</p>
+                    <p className="text-base text-[#1C2526]"><strong>Business:</strong> {alert.business_name || 'N/A'}</p>
+                    <p className="text-base text-[#1C2526]"><strong>Location:</strong> {alert.latitude}, {alert.longitude}</p>
+                    <p className="text-base text-[#1C2526]"><strong>Symptoms:</strong> {alert.symptoms.map(s => s.name).join(', ') || 'None'}</p>
+                    <p className="text-base text-[#1C2526]"><strong>Tags:</strong> {alert.tags.map(t => t.name).join(', ') || 'None'}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </section>
     </div>
   );
 };
