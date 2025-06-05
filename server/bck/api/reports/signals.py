@@ -27,7 +27,7 @@ def send_alert_to_subscribers(sender, instance, created, **kwargs):
         send_mail(
             subject="🚨 Nearby Alert: " + instance.title,
             message=f"A food-related alert was reported near your area:\n\n{instance.description}",
-            from_email=EMAIL_HOST_USER
+            from_email=EMAIL_HOST_USER,
             recipient_list=[sub.email],
             fail_silently=True,
         )
