@@ -7,6 +7,7 @@ router.register(r"subscription", SubscriptionViewSet, basename="subscription")
 
 
 urlpatterns = [
+    path("", include(router.urls)),
     path('subscribe/', subscribe, name='subscribe'),
     path('nearby-reports/', nearby_reports, name='nearby_reports'),
 ]
