@@ -27,12 +27,13 @@ class ReportSerializer(serializers.ModelSerializer):
     # Read-only nested serializers to display full info
     symptoms_read = SymptomSerializer(source="symptoms", many=True, read_only=True)
     tags_read = TagSerializer(source="tags", many=True, read_only=True)
-
+    image = serializers.ImageField(max_length=None,allow_empty_file=False,allow_null=True,required=False)
     class Meta:
         model = Report
         fields = [
             "id",
             "title",
+            "image",
             "description",
             "location",
             "business_name",

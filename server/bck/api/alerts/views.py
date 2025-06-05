@@ -1,34 +1,18 @@
-from rest_framework import serializers, status
+from rest_framework import serializers, status , viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Subscription
-from api.models import Report, Symptom, Tag
+from .serializers import SubscriptionSerializer
+from api.reports.models import Report, Symptom, Tag
+from api.reports.serializers import ReportSerializer, Symptom, Tag
 import math
 from datetime import timedelta
 from django.utils import timezone
 
-class SubscriptionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subscription
-        fields = ['username', 'email', 'phone', 'latitude', 'longitude']
+class SubscriptionViewSet(viewsets.ModelViewSet):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
 
-class SymptomSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Symptom
-        fields = ['name']
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ['name']
-
-class ReportSerializer(serializers.ModelSerializer):
-    symptoms = SymptomSerializer(many=True, read_only=True)
-    tags = TagSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Report
-        fields = ['title', 'description', 'location', 'business_name', 'symptoms', 'tags']
 
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371
