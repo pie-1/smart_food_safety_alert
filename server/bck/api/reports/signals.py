@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from server.bck.bck.settings import EMAIL_HOST_USER
-from ..alerts.models import Report
+from .models import Report
 from api.alerts.models import Subscription  # adjust import as needed
 from api.alerts.views import haversine, parse_location  # reuse your logic
 from django.core.mail import send_mail  # or any other method
